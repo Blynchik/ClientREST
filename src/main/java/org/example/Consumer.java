@@ -4,9 +4,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Consumer {
     public static void main(String[] args) {
@@ -14,12 +13,12 @@ public class Consumer {
 
         sendNewSensor(sensorName);
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 10; i++) {
             sendNewMeasurement(sensorName);
         }
-        ArrayList response = getMeasurements();
+        List<Map<String, Object>> response = getMeasurements();
 
-        for (Object measurement : response) {
+        for (Map<String, Object> measurement : response) {
             System.out.println(measurement.toString());
         }
     }
@@ -44,11 +43,17 @@ public class Consumer {
         makeRequest(url, measurementToSend);
     }
 
-    public static ArrayList getMeasurements() {
+    public static List<Map<String, Object>> getMeasurements() {
         String url = "http://localhost:8080/measurements";
         final RestTemplate restTemplate = new RestTemplate();
 
-        return restTemplate.getForObject(url, ArrayList.class);
+       ArrayList response =  restTemplate.getForObject(url, ArrayList.class);
+
+        if (response == null || response.isEmpty()){
+            return Collections.emptyList();
+        }
+
+        return response;
     }
 
     private static Boolean getRaining() {
